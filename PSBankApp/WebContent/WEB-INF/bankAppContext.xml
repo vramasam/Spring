@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc  
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+       
+       <context:component-scan base-package="com.ps.springmvc.psbankApp"></context:component-scan>
+       
+       <mvc:annotation-driven></mvc:annotation-driven>
+       
+       <!-- Required for images to be used -->
+       <mvc:resources location="/resources/images" mapping="/resources/**"/>
+       
+       <!-- Aspect Oriented programming, to add logging or other capabilities generic across app module -->
+       <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+       
+       <!-- JSP views (JSTL Library) -->
+       <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+       		<property name="prefix" value="/WEB-INF/Views/"></property>
+       		<property name="suffix" value=".jsp"></property>
+        </bean>
+        
+        <!-- For properties file -->
+         <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        	<property name="basenames">
+        		<list>
+        			<value>WEB-INF/account</value>
+        		</list>
+        	</property>
+        	<property name="defaultEncoding" value="UTF-8"/>
+        </bean>
+        
+        <!-- Step 1 Hibernate: Define database data source,JDBC statement and connection pooling class(added from optional package form hibernate jar) -->
+        <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+        destroy-method="close">
+        	<property name="driverClass" value="com.mysql.cj.jdbc.Driver" />
+        	<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/psbankdb?useSSL=false"/>
+        	<property name="user" value="root"/>
+        	<property name="password" value="concurat12345"/>
+        </bean>
+        
+        <!-- Step 2 Hibernate: Setup Hibernate Session factory, Hibernate uses session factory to connect with database -->
+        <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+           <!-- Reference to establish database connection -->
+           <property name="dataSource" ref="dataSource"/>
+           <!-- package to scan, here we can specify additional packages using comma  -->
+           <!-- <property name="packagesToScan" value="com.ps.springmvc.psbankApp"/> -->
+           <property name="packagesToScan" value="com.ps.springmvc.psbankApp"/>
+        		
+           <property name="hibernateProperties">
+           		<props>
+           			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+           			<!-- to display the sql statement in the console -->
+           			<prop key="hibernate.show_sql">true</prop>
+           		</props>
+           </property>
+        </bean>
+        
+        <!-- Step 3 Hibernate: Avoid manual coding: Set up transaction manager, Setting up the hibernate transaction manager -->
+        <bean id="myTransactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+          <property name="sessionFactory" ref="sessionFactory"></property>
+        </bean> 
+        
+        <!-- Step 4 Hibernate:Enable configuration for Transaction annotation -->
+        <tx:annotation-driven transaction-manager="myTransactionManager"/> 
+        
+       
+</beans>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+  <display-name>PSBankApp</display-name>
+  
+     <!-- Because we config (bankSecurity.xml) in a separate file, 
+     we need to add the file here, to load the file at start up  -->
+     <listener>
+       <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+     </listener>
+     
+     <context-param>
+          <param-name>contextConfigLocation</param-name>
+          <param-value>
+          		/WEB-INF/bankAppContext.xml,
+          		/WEB-INF/bankSecurity.xml
+          </param-value>
+     </context-param>
+  
+      <!-- This is require for Spring security -->
+      <!-- The responsibility of delegating filter proxy is simply to delegate http request filtering to a spring bean, that 
+      implements the filter interface, By default it delegates to a bean whose name is same as the name present at the 
+      filter-name(Here:springSecurityFilterChain). Spring security will automatically configure filter chain with the name 
+      springSecurityFilterChain(here) whenever we enable the application security, then we can use the DelegatingfilterProxy instance-->
+       <filter>
+       		<filter-name>springSecurityFilterChain</filter-name>
+       		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+       </filter>
+       
+       <filter-mapping>
+       		<filter-name>springSecurityFilterChain</filter-name>
+       		<url-pattern>/*</url-pattern>
+       </filter-mapping>
+ 		
+ 		<!-- Register the dispatcher servlet -->
+ 		<servlet>
+ 			<servlet-name>SpringController</servlet-name>
+ 			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+ 			<init-param>
+ 			   <param-name>contextConfigLocation</param-name>
+ 			   <param-value>/WEB-INF/bankAppContext.xml</param-value>
+ 			
+ 			</init-param>
+ 			<load-on-startup>1</load-on-startup>
+ 		</servlet>
+ 		<servlet-mapping>
+ 		    <servlet-name>SpringController</servlet-name>
+ 		    <url-pattern>/</url-pattern>
+ 		</servlet-mapping>
+</web-app>
